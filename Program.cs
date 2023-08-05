@@ -10,7 +10,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlCon"));
 });
-builder.Services.AddIdentityWithExtensions(;
+builder.Services.AddIdentityWithExtensions();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
