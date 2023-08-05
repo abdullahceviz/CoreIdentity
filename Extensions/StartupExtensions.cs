@@ -23,7 +23,7 @@ namespace AspNetCoreIdentityApp.Web.Extensions
                 //sayısal karakter gerekli mi
                 options.Password.RequireDigit = false;
 
-            }).AddPasswordValidator<PasswordValidator>().AddEntityFrameworkStores<AppDbContext>();
+            }).AddPasswordValidator<PasswordValidator>().AddUserValidator<UserValidator>().AddEntityFrameworkStores<AppDbContext>();
         }
     }
 }
