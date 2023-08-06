@@ -89,9 +89,24 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             ModelState.AddModelErrorList(identityresult.Errors.Select(x => x.Description).ToList());
             return View();
         }
-        public IActionResult ResetPassword()
+        public IActionResult ForgetPassword()
         {
             return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel resetPasswordViewModel)
+        {
+            var hasUser = await _userManager.FindByEmailAsync(resetPasswordViewModel.Email); 
+            if(hasUser == null) 
+            {
+                ModelState.AddModelError(string.Empty, "Bu email adresine ait kullanıcı bulunamamıştır.");
+                return View();
+            }
+            string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
+            var passwwordResetLink = Url.Action("ResetPassword","Home",new { userId = hasUser.Id,Token=passwordResetToken });
+
+            TempData["SuccessMessage"] = "Şifre yenileme linki, eposta adresinize gönderilmiştir.";
+            return RedirectToAction(nameof(ForgetPassword));
         }
     }
 }
