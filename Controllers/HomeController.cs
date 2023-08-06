@@ -89,5 +89,9 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             ModelState.AddModelErrorList(identityresult.Errors.Select(x => x.Description).ToList());
             return View();
         }
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
     }
 }
