@@ -9,7 +9,7 @@ namespace AspNetCoreIdentityApp.Web.CustomValidations
         public Task<IdentityResult> ValidateAsync(UserManager<AppUser> manager, AppUser user, string? password)
         {
             var errors = new List<IdentityError>();
-            if(password!.ToLower().Contains(user.UserName.ToLower()))
+            if(password!.ToLower().Contains(user.UserName!.ToLower()))
             {
                 errors.Add(new() { Code = "PasswordNoContainUserName", Description = "Şifre alanı kullancı adı içeremez." });
             }

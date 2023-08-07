@@ -18,8 +18,10 @@ builder.Services.AddIdentityWithExtensions();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    var cookieBuilder = new CookieBuilder();
-    cookieBuilder.Name = "UdemyAppCookie";
+    CookieBuilder cookieBuilder = new()
+    {
+        Name = "UdemyAppCookie"
+    };
     options.LoginPath = new PathString("/Home/Signin");
     options.LogoutPath = new PathString("/Member/Logout");
     options.Cookie = cookieBuilder;

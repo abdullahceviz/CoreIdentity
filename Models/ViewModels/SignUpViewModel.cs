@@ -17,20 +17,22 @@ namespace AspNetCoreIdentityApp.Web.Models.ViewModels
         }
         [Required(ErrorMessage ="Kullancı Ad alanı boş bırakılamaz.")]
         [Display(Name="Kullanıcı Adi :")]
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
         [Display(Name = "Email :")]
         [Required(ErrorMessage = "Email alanı boş bırakılamaz.")]
         [EmailAddress(ErrorMessage ="Email formatı yanlıştır.")]
-        public string Email { get; set; }
+        public string? Email { get; set; }
         [Required(ErrorMessage = "Telefon alanı boş bırakılamaz.")]
         [Display(Name = "Telefon :")]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
+        [DataType(DataType.Password)]
         [Required(ErrorMessage = "Şifre alanı boş bırakılamaz.")]
         [Display(Name = "Şifre :")]
-        public string Password { get; set; }
+        public string? Password { get; set; }
+        [DataType(DataType.Password)]
         [Required(ErrorMessage = "Şifre Tekrar alanı boş bırakılamaz.")]
         [Display(Name = "Şifre Tekrar :")]
         [Compare(nameof(Password),ErrorMessage ="Şifre aynı değildir.")]
-        public string PasswordConfirm { get; set; }
+        public string? PasswordConfirm { get; set; }
     }
 }

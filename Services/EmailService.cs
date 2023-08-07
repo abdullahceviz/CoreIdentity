@@ -16,15 +16,19 @@ namespace AspNetCoreIdentityApp.Web.Services
 
         public async Task SendResetPasswordEmail(string resetPasswordEmailLink, string toEmail)
         {
-            var smtpClinet = new SmtpClient();
-            smtpClinet.Host = _emailSettings.Host;
-            smtpClinet.DeliveryMethod = SmtpDeliveryMethod.Network;
-            smtpClinet.UseDefaultCredentials = false;
-            smtpClinet.Port = 587;
-            smtpClinet.Credentials = new NetworkCredential(_emailSettings.Email, _emailSettings.Password);
-            smtpClinet.EnableSsl = true;
-            var mailMessage = new MailMessage();
-            mailMessage.From = new MailAddress(_emailSettings.Email);
+            SmtpClient smtpClinet = new()
+            {
+                Host = _emailSettings.Host!,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Port = 587,
+                Credentials = new NetworkCredential(_emailSettings.Email, _emailSettings.Password),
+                EnableSsl = true
+            };
+            MailMessage mailMessage = new()
+            {
+                From = new MailAddress(_emailSettings.Email!)
+            };
             mailMessage.To.Add(toEmail);
             mailMessage.Subject = "Localhost | Şifre sıfırlama linki";
             mailMessage.Body = @$"

@@ -43,19 +43,19 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInViewModel model, string returnUrl = null)
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
         {
-            returnUrl = returnUrl ?? Url.Action("Index", "Home");
-            var hasUser = await _userManager.FindByEmailAsync(model.Email);
+            returnUrl ??= Url.Action("Index", "Home")!;
+            var hasUser = await _userManager.FindByEmailAsync(model.Email!);
             if (hasUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Email veya şifre yanlış");
                 return View();
             }
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
+            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password!, model.RememberMe, true);
             if (signInResult.Succeeded)
             {
-                return Redirect(returnUrl);
+                return Redirect(returnUrl!);
             }
             if (signInResult.IsLockedOut)
             {
@@ -83,7 +83,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 Email = request.Email,
                 PhoneNumber = request.Phone
 
-            }, request.PasswordConfirm);
+            }, request.PasswordConfirm!);
             if (identityresult.Succeeded)
             {
                 TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıtla gerçekleşmiştir.";
@@ -99,7 +99,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel resetPasswordViewModel)
         {
-            var hasUser = await _userManager.FindByEmailAsync(resetPasswordViewModel.Email); 
+            var hasUser = await _userManager.FindByEmailAsync(resetPasswordViewModel.Email!); 
             if(hasUser == null) 
             {
                 ModelState.AddModelError(string.Empty, "Bu email adresine ait kullanıcı bulunamamıştır.");
@@ -107,9 +107,43 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }
             string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
             var passwwordResetLink = Url.Action("ResetPassword","Home",new { userId = hasUser.Id, Token = passwordResetToken },HttpContext.Request.Scheme);
-            await _emailService.SendResetPasswordEmail(passwwordResetLink, hasUser.Email);
+            await _emailService.SendResetPasswordEmail(passwwordResetLink!, hasUser.Email!);
             TempData["SuccessMessage"] = "Şifre yenileme linki, eposta adresinize gönderilmiştir.";
             return RedirectToAction(nameof(ForgetPassword));
+        }
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            TempData["userId"] = userId;
+            TempData["token"] = token;
+            
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel resetPasswordViewModel)
+        {
+            var userId = TempData["userId"];
+            var token = TempData["token"];
+            if(userId == null || token==null)
+            {
+                throw new Exception("Bir hata meydana geldi");
+            }
+            var hasUser = await _userManager.FindByIdAsync(userId.ToString()!);
+            if (hasUser == null)
+            {
+                ModelState.AddModelError(string.Empty, "Kullanıcı bulanamamıştır");
+                return View();
+            }
+            var result = await _userManager.ResetPasswordAsync(hasUser,token!.ToString()!,resetPasswordViewModel.Password!);
+            if(result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Şifreniz yenilenmiştir.";
+            }
+            else
+            {
+                ModelState.AddModelErrorList(result.Errors.Select(x=>x.Description).ToList());
+            }
+
+            return View();
         }
     }
 }
