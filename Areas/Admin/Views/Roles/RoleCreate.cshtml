@@ -1,0 +1,30 @@
+﻿@model AdminViewModel.RoleCreateViewModel
+
+@{
+    ViewData["Title"] = "RoleCreate";
+}
+
+<h4>Role Oluşturma</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h2>Role Oluşturma</h2>
+        <form asp-action="RoleCreate">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Oluştur" class="btn btn-primary" />
+            </div>
+        </form>
+        <div>
+            <a asp-action="Index">Role listesine geri dön</a>
+        </div>
+    </div>
+</div>
+
+
+
