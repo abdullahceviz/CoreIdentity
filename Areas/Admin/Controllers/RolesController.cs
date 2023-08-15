@@ -43,5 +43,19 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             }
             return RedirectToAction(nameof(RolesController.Index));
         }
+        public async Task<IActionResult> RoleUpdate(string id)
+        {
+            var roleToUpdate = (await _roleManager.FindByIdAsync(id))! ?? throw new Exception("Güncellenecek rol bulunamamıştır.");
+            return View(new RoleUpdateViewModel() { Id =roleToUpdate.Id, Name=roleToUpdate.Name!});
+        }
+        [HttpPost]
+        public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel roleUpdateViewModel) 
+        {
+            var roleToUpdate = (await _roleManager.FindByIdAsync(roleUpdateViewModel.Id)) ?? throw new Exception("Güncellenecek rol bulunamamıştır.");
+            roleToUpdate.Name = roleUpdateViewModel.Name;
+            await _roleManager.UpdateAsync(roleToUpdate);
+            ViewData["SuccessMessage"] = "Rol bilgisi güncellenmiştir.";
+            return View();
+        }
     }
 }
