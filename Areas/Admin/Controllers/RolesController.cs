@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using AspNetCoreIdentityApp.Web.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 {
@@ -47,10 +48,10 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
         public async Task<IActionResult> RoleUpdate(string id)
         {
             var roleToUpdate = (await _roleManager.FindByIdAsync(id))! ?? throw new Exception("Güncellenecek rol bulunamamıştır.");
-            return View(new RoleUpdateViewModel() { Id =roleToUpdate.Id, Name=roleToUpdate.Name!});
+            return View(new RoleUpdateViewModel() { Id = roleToUpdate.Id, Name = roleToUpdate.Name! });
         }
         [HttpPost]
-        public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel roleUpdateViewModel) 
+        public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel roleUpdateViewModel)
         {
             var roleToUpdate = (await _roleManager.FindByIdAsync(roleUpdateViewModel.Id)) ?? throw new Exception("Güncellenecek rol bulunamamıştır.");
             roleToUpdate.Name = roleUpdateViewModel.Name;
@@ -63,12 +64,49 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
         {
             var roleToDelete = (await _roleManager.FindByIdAsync(id)) ?? throw new Exception("Silinecek rol bulunamamıştır.");
             var result = await _roleManager.DeleteAsync(roleToDelete);
-            if(!result.Succeeded)
+            if (!result.Succeeded)
             {
-                throw new Exception(result.Errors.Select(x=>x.Description).First());
+                throw new Exception(result.Errors.Select(x => x.Description).First());
             }
             TempData["SuccessMessage"] = "Rol silinmiştir.";
             return RedirectToAction(nameof(RolesController.Index));
+        }
+        public async Task<IActionResult> AssignRoleToUser(string id)
+        {
+            var curremtUser = await _userManager.FindByIdAsync(id);
+            ViewBag.UserId = curremtUser!.Id;
+            var roles = await _roleManager.Roles.ToListAsync();
+            var roleViewModelList = new List<AssignToUserViewModel>();
+            var userRoles = await _userManager.GetRolesAsync(curremtUser!);
+            foreach (var role in roles)
+            {
+                var assignRoleToUser = new AssignToUserViewModel() { Id = role.Id, Name = role.Name! };
+                if (userRoles.Contains(role.Name!))
+                {
+                    assignRoleToUser.Exist = true;
+                }
+                roleViewModelList.Add(assignRoleToUser);
+            }
+            return View(roleViewModelList);
+        }
+        [HttpPost]
+        public async Task<IActionResult> AssignRoleToUser(string userId,List<AssignToUserViewModel> assignToUserViewModelList)
+        {
+            var userToAssignToRoles = await _userManager.FindByIdAsync(userId);
+            foreach(var role in assignToUserViewModelList)
+            {
+                //await _userManager.AddToRoleAsync(userToAssignToRoles!, role.Name);
+                if(role.Exist)
+                {
+                    await _userManager.AddToRoleAsync(userToAssignToRoles!, role.Name);
+                }
+                else
+                {
+                    await _userManager.RemoveFromRoleAsync(userToAssignToRoles!, role.Name);
+                }
+            }
+            
+            return RedirectToAction(nameof(HomeController.UserList),"Home");
         }
     }
 }
