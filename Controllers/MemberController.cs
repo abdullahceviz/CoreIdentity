@@ -122,12 +122,22 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             
             return View(userEditViewModel);
         }
-        public async Task<IActionResult> AccessDenied(string ReturnUrl)
+        public IActionResult AccessDenied(string ReturnUrl)
         {
             string message = string.Empty;
             message = "Bu sayfayı görmeye yetkiniz yoktur. Yetki almak için yöneticiniz ile görüşebilirsiniz.";
             ViewBag.message = message;
             return View();
+        }
+        public async Task<IActionResult> Claims()
+        {
+            var userClaimList = User.Claims.Select(x => new ClaimViewModel()
+            {
+                Issuer = x.Issuer,
+                Type = x.Type,
+                Value = x.Value
+            }).ToList();
+            return View(userClaimList);
         }
     }
 }
