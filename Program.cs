@@ -1,7 +1,9 @@
+using AspNetCoreIdentityApp.Web.ClaimProvider;
 using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Models;
 using AspNetCoreIdentityApp.Web.Models.OptionsModels;
 using AspNetCoreIdentityApp.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -22,6 +24,7 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 builder.Services.AddIdentityWithExtensions();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
     CookieBuilder cookieBuilder = new()

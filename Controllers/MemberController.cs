@@ -101,7 +101,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             if(userEditViewModel.Picture != null && userEditViewModel.Picture.Length>=0)
             {
                 var wwwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
-                string randomFileName = $"{Guid.NewGuid().ToString()}{ Path.GetExtension(userEditViewModel.Picture.FileName)}";
+                string randomFileName = $"{Guid.NewGuid()}{ Path.GetExtension(userEditViewModel.Picture.FileName)}";
                 var newPicturePath = Path.Combine(wwwrootFolder.First(x => x.Name == "userpictures")
                     .PhysicalPath!, randomFileName);
                 using var stream = new FileStream(newPicturePath, FileMode.Create);
@@ -122,14 +122,12 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             
             return View(userEditViewModel);
         }
-        public IActionResult AccessDenied(string ReturnUrl)
+        public IActionResult AccessDenied()
         {
-            string message = string.Empty;
-            message = "Bu sayfayı görmeye yetkiniz yoktur. Yetki almak için yöneticiniz ile görüşebilirsiniz.";
-            ViewBag.message = message;
+            ViewBag.message = "Bu sayfayı görmeye yetkiniz yoktur. Yetki almak için yöneticiniz ile görüşebilirsiniz.";
             return View();
         }
-        public async Task<IActionResult> Claims()
+        public IActionResult Claims()
         {
             var userClaimList = User.Claims.Select(x => new ClaimViewModel()
             {
