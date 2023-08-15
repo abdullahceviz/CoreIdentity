@@ -137,6 +137,12 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }).ToList();
             return View(userClaimList);
         }
+        [Authorize(Policy ="AnkaraPolicy")]
+        [HttpGet]
+        public IActionResult AnkaraPage()
+        {
+            return View();
+        }
     }
 }
     
