@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {

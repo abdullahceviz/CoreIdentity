@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using AspNetCoreIdentityApp.Web.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
 {
@@ -19,7 +20,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             _roleManager = roleManager;
             _userManager = userManager;
         }
-
+        [Authorize(Roles = "admin,role-action")]
         public async Task<IActionResult> Index()
         {
             var roles = await _roleManager.Roles.Select(x => new RoleViewModel()
@@ -29,10 +30,12 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             }).ToListAsync();
             return View(roles);
         }
+        [Authorize(Roles = "role-action")]
         public IActionResult RoleCreate()
         {
             return View();
         }
+        [Authorize(Roles ="role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleCreate(RoleCreateViewModel roleCreateViewModel)
         {
@@ -45,11 +48,13 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             TempData["SuccessMessage"] = "Rol oluuşturulmuştur.";
             return RedirectToAction(nameof(RolesController.Index));
         }
+        [Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleUpdate(string id)
         {
             var roleToUpdate = (await _roleManager.FindByIdAsync(id))! ?? throw new Exception("Güncellenecek rol bulunamamıştır.");
             return View(new RoleUpdateViewModel() { Id = roleToUpdate.Id, Name = roleToUpdate.Name! });
         }
+        [Authorize(Roles = "role-action")]
         [HttpPost]
         public async Task<IActionResult> RoleUpdate(RoleUpdateViewModel roleUpdateViewModel)
         {
@@ -59,7 +64,7 @@ namespace AspNetCoreIdentityApp.Web.Areas.Admin.Controllers
             ViewData["SuccessMessage"] = "Rol bilgisi güncellenmiştir.";
             return View();
         }
-
+        [Authorize(Roles = "role-action")]
         public async Task<IActionResult> RoleDelete(string id)
         {
             var roleToDelete = (await _roleManager.FindByIdAsync(id)) ?? throw new Exception("Silinecek rol bulunamamıştır.");
