@@ -6,6 +6,7 @@ using System.Diagnostics;
 using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -89,13 +90,22 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 PhoneNumber = request.Phone
 
             }, request.PasswordConfirm!);
-            if (identityresult.Succeeded)
+            if (!identityresult.Succeeded)
             {
-                TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıtla gerçekleşmiştir.";
-                return RedirectToAction(nameof(HomeController.SignUp));
+                ModelState.AddModelErrorList(identityresult.Errors.Select(x => x.Description).ToList());
+                return View();
             }
-            ModelState.AddModelErrorList(identityresult.Errors.Select(x => x.Description).ToList());
-            return View();
+
+            var exchangeClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
+            var user = await _userManager.FindByNameAsync(request.UserName!);
+            var claimResult = await _userManager.AddClaimAsync(user!, exchangeClaim);
+            if (!claimResult.Succeeded)
+            {
+                ModelState.AddModelErrorList(identityresult.Errors.Select(x => x.Description).ToList());
+                return View();
+            }
+            TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıtla gerçekleşmiştir.";
+            return RedirectToAction(nameof(HomeController.SignUp));
         }
         public IActionResult ForgetPassword()
         {
@@ -104,14 +114,14 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel resetPasswordViewModel)
         {
-            var hasUser = await _userManager.FindByEmailAsync(resetPasswordViewModel.Email!); 
-            if(hasUser == null) 
+            var hasUser = await _userManager.FindByEmailAsync(resetPasswordViewModel.Email!);
+            if (hasUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Bu email adresine ait kullanıcı bulunamamıştır.");
                 return View();
             }
             string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
-            var passwwordResetLink = Url.Action("ResetPassword","Home",new { userId = hasUser.Id, Token = passwordResetToken },HttpContext.Request.Scheme);
+            var passwwordResetLink = Url.Action("ResetPassword", "Home", new { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
             await _emailService.SendResetPasswordEmail(passwwordResetLink!, hasUser.Email!);
             TempData["SuccessMessage"] = "Şifre yenileme linki, eposta adresinize gönderilmiştir.";
             return RedirectToAction(nameof(ForgetPassword));
@@ -120,7 +130,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         {
             TempData["userId"] = userId;
             TempData["token"] = token;
-            
+
             return View();
         }
         [HttpPost]
@@ -128,7 +138,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         {
             var userId = TempData["userId"];
             var token = TempData["token"];
-            if(userId == null || token==null)
+            if (userId == null || token == null)
             {
                 throw new Exception("Bir hata meydana geldi");
             }
@@ -138,14 +148,14 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 ModelState.AddModelError(string.Empty, "Kullanıcı bulanamamıştır");
                 return View();
             }
-            var result = await _userManager.ResetPasswordAsync(hasUser,token!.ToString()!,resetPasswordViewModel.Password!);
-            if(result.Succeeded)
+            var result = await _userManager.ResetPasswordAsync(hasUser, token!.ToString()!, resetPasswordViewModel.Password!);
+            if (result.Succeeded)
             {
                 TempData["SuccessMessage"] = "Şifreniz yenilenmiştir.";
             }
             else
             {
-                ModelState.AddModelErrorList(result.Errors.Select(x=>x.Description).ToList());
+                ModelState.AddModelErrorList(result.Errors.Select(x => x.Description).ToList());
             }
 
             return View();
