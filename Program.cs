@@ -28,6 +28,7 @@ builder.Services.AddIdentityWithExtensions();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequierementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ViolenceRequiermentHandler>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AnkaraPolicy", policy =>
@@ -37,6 +38,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ExchangePolicy", policy =>
     {
         policy.AddRequirements(new ExchangeExpireRequierement());
+    });
+    options.AddPolicy("ViolencePolicy", policy =>
+    {
+        policy.AddRequirements(new ViolenceRequierment() { TresholdAge =18});
     });
 });
 builder.Services.ConfigureApplicationCookie(options =>
