@@ -1,0 +1,15 @@
+﻿@using Microsoft.AspNetCore.Authorization;
+
+@{
+    ViewData["Title"] = "Index";
+}
+@inject IAuthorizationService autgorizationService
+<h1>Permissions.Order.Read</h1>
+@if (autgorizationService.AuthorizeAsync(User, "Permissions.Order.Delete").Result.Succeeded)
+{
+    <button class="btn btn-primary">Permissions.Order.Delete</button>
+}
+@if (autgorizationService.AuthorizeAsync(User, "Permissions.Stock.Delete").Result.Succeeded)
+{
+    <button class="btn btn-primary">Permissions.Stock.Delete</button>
+}
