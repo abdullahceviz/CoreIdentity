@@ -36,35 +36,35 @@ namespace AspNetCoreIdentityApp.Web.Seeds
         public static async Task AddReadPermission(AppRole role,RoleManager<AppRole> roleManager)
         {
             await roleManager.AddClaimAsync(role!,
-                    new Claim("Permissions", PermissionsRoot.Permissions.Stock.Read));
+                    new Claim("Permissions", Core.PermissionsRoot.Permissions.Stock.Read));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Order.Read));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Order.Read));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Catalog.Read));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Catalog.Read));
         }
         public static async Task AddUpdateAndCreatePermission(AppRole role, RoleManager<AppRole> roleManager)
         {
             await roleManager.AddClaimAsync(role!,
-                    new Claim("Permissions", PermissionsRoot.Permissions.Stock.Create));
+                    new Claim("Permissions", Core.PermissionsRoot.Permissions.Stock.Create));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Order.Create));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Order.Create));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Catalog.Create));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Catalog.Create));
             await roleManager.AddClaimAsync(role!,
-                    new Claim("Permissions", PermissionsRoot.Permissions.Stock.Update));
+                    new Claim("Permissions", Core.PermissionsRoot.Permissions.Stock.Update));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Order.Update));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Order.Update));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Catalog.Update));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Catalog.Update));
         }
         public static async Task AddDeletePermission(AppRole role, RoleManager<AppRole> roleManager)
         {
             await roleManager.AddClaimAsync(role!,
-                    new Claim("Permissions", PermissionsRoot.Permissions.Stock.Delete));
+                    new Claim("Permissions", Core.PermissionsRoot.Permissions.Stock.Delete));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Order.Delete));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Order.Delete));
             await roleManager.AddClaimAsync(role!,
-                new Claim("Permissions", PermissionsRoot.Permissions.Catalog.Delete));
+                new Claim("Permissions", Core.PermissionsRoot.Permissions.Catalog.Delete));
         }
     }
 }
