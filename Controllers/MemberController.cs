@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using AspNetCoreIdentityApp.Core.Models;
 using AspNetCoreIdentityApp.Service.Services;
+using Azure.Core;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
@@ -22,7 +23,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         private readonly IMemberService _memberService;
         private string userName => User.Identity!.Name!;
 
-        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider, IMemberService memberService = null)
+        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider, IMemberService memberService = null!)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -66,66 +67,30 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
         public async Task<IActionResult> UserEdit()
         {
-            ViewBag.gender = new SelectList(Enum.GetNames(typeof(Gender)));
-            var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
-            var userEditViewModel = new UserEditViewModel()
-            {
-                UserName = currentUser.UserName,
-                Email = currentUser.Email,
-                Phone = currentUser.PhoneNumber,
-                BirthDate = currentUser.BirthDate,
-                City = currentUser.City,
-                Gender = currentUser.Gender
-            };
-            return View(userEditViewModel);
+            ViewBag.gender = _memberService.GetGenderSelectList();
+            
+            return View(await _memberService.GetUserEditViewModelAsync(userName));
         }
         [HttpPost]
         public async Task<IActionResult> UserEdit(UserEditViewModel userEditViewModel)
         {
             if (!ModelState.IsValid)
             {
-                return View(); 
-            }
-            var currentUser = (await _userManager.FindByNameAsync(User.Identity!.Name!))!;
-            currentUser.UserName = userEditViewModel.UserName;
-            currentUser.Email = userEditViewModel.Email;
-            currentUser.BirthDate = userEditViewModel.BirthDate;
-            currentUser.City = userEditViewModel.City;
-            currentUser.Gender = userEditViewModel.Gender;
-            currentUser.PhoneNumber = userEditViewModel.Phone;
-            if(userEditViewModel.Picture != null && userEditViewModel.Picture.Length>=0)
-            {
-                var wwwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
-                string randomFileName = $"{Guid.NewGuid()}{ Path.GetExtension(userEditViewModel.Picture.FileName)}";
-                var newPicturePath = Path.Combine(wwwrootFolder.First(x => x.Name == "userpictures")
-                    .PhysicalPath!, randomFileName);
-                using var stream = new FileStream(newPicturePath, FileMode.Create);
-                await userEditViewModel.Picture.CopyToAsync(stream);
-                currentUser.Picture = randomFileName;
-
-            }
-            var updateToUserResult = await _userManager.UpdateAsync(currentUser);
-            if(!updateToUserResult.Succeeded)
-            {
-                ModelState.AddModelErrorList(updateToUserResult.Errors);
                 return View();
             }
-            await _userManager.UpdateAsync(currentUser);
-            await _signInManager.SignOutAsync();
-            if(userEditViewModel.BirthDate.HasValue)
+
+
+            var (isSuccess, errors) = await _memberService.EditUserAsync(userEditViewModel, userName);
+
+            if (!isSuccess)
             {
-                await _signInManager.SignInWithClaimsAsync(currentUser, true, new[]{
-                    new Claim("birthdate",currentUser.BirthDate!.Value.ToString())});
+                ModelState.AddModelErrorList(errors!);
+                return View();
             }
-            else
-            {
-                await _signInManager.SignInAsync(currentUser, true);
-            }
-            
-           
-            TempData["SuccessMessage"] = "Üye bilgileri başarıyla değiştirilmiştir.";
-            
-            return View(userEditViewModel);
+
+            TempData["SuccessMessage"] = "Üye bilgileri başarıyla değiştirilmiştir";
+
+            return View(await _memberService.GetUserEditViewModelAsync(userName));
         }
         public IActionResult AccessDenied()
         {
@@ -134,13 +99,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         }
         public IActionResult Claims()
         {
-            var userClaimList = User.Claims.Select(x => new ClaimViewModel()
-            {
-                Issuer = x.Issuer,
-                Type = x.Type,
-                Value = x.Value
-            }).ToList();
-            return View(userClaimList);
+            return View(_memberService.GetClaims(User));
         }
         [Authorize(Policy ="AnkaraPolicy")]
         [HttpGet]
