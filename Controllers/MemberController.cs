@@ -48,22 +48,18 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             {
                 return View();
             }
-            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
-            var checkOldPassword = await _userManager.CheckPasswordAsync(currentUser!, passwordChangeViewModel.PasswordOld);
-            if (!checkOldPassword)
+            if (! await _memberService.CheckPasswordAync(userName,passwordChangeViewModel.PasswordOld))
             {
                 ModelState.AddModelError(string.Empty, "Eski Şifreniz yanlış");
                 return View();
             }
-            var resultChangePassword = await _userManager.ChangePasswordAsync(currentUser!, passwordChangeViewModel.PasswordOld, passwordChangeViewModel.PasswordNew);
-            if (!resultChangePassword.Succeeded)
+            var (isSuccess,errors) = await _memberService.ChangePasswordAsync(userName, passwordChangeViewModel.PasswordOld, passwordChangeViewModel.PasswordNew);
+            if (!isSuccess)
             {
-                ModelState.AddModelErrorList(resultChangePassword.Errors.Select(x => x.Description).ToList());
+                ModelState.AddModelErrorList(errors!);
                 return View();
             }
-            await _userManager.UpdateSecurityStampAsync(currentUser!);
-            await _signInManager.SignOutAsync();
-            await _signInManager.PasswordSignInAsync(currentUser!, passwordChangeViewModel.PasswordNew, true, false);
+           
             TempData["SuccessMessage"] = "Şifre değiştirme işleminiz başarıyla gerçekleşmiştir.";
             return View();
         }
