@@ -7,6 +7,7 @@ using AspNetCoreIdentityApp.Web.Extensions;
 using AspNetCoreIdentityApp.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using AspNetCoreIdentityApp.Core.Models;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
 {
